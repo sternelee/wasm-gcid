@@ -1,4 +1,5 @@
 import * as wasm from "@sternelee/wasm-gcid";
+import CryptoJS from "crypto-js";
 
 console.log(wasm);
 const { Gcid } = wasm
@@ -14,6 +15,45 @@ const request = async function (url) {
   })
 }
 
+const calculateBlockSize = function (size) {
+  if (size >= 0 && size <= (128 << 20)) {
+    return 256 << 10
+  }
+  if (size > (128 << 20) && size <= (256 << 20)) {
+    return 512 << 10
+  }
+  if (size > (256 << 20) && size <= (512 << 20)) {
+    return 1024 << 10
+  }
+  return 2048 << 10
+}
+
+function JSGcid (ab, blockSize) {
+    let gcidSHA1 = CryptoJS.algo.SHA1.create();
+    const size = ab.byteLength
+    const blockNum = size / blockSize
+    for (let i = 0; i < blockNum; i++) {
+      const wa = CryptoJS.lib.WordArray.create(ab.slice(blockSize * i, blockSize * (i + 1)))
+      const bcidSHA1 = CryptoJS.SHA1(wa)
+      gcidSHA1.update(bcidSHA1)
+    }
+    if (blockSize * blockNum < size) {
+      const wa = CryptoJS.lib.WordArray.create(ab.slice(blockSize * blockNum, size))
+      const bcidSHA1 = CryptoJS.SHA1(wa)
+      gcidSHA1.update(bcidSHA1)
+    }
+    return gcidSHA1.finalize().toString().toUpperCase()
+}
+
+async function crypto_gcid () {
+    const buffers = await request('/720P.mp4')
+    const segment = new Uint8Array(buffers);
+    const blockSize = calculateBlockSize(segment.byteLength)
+    console.log('blockSize', blockSize)
+    const result = JSGcid(segment, blockSize);
+    console.log(result)
+}
+
 async function main () {
   const buffers = await request('/720P.mp4')
   const segment = new Uint8Array(buffers);
@@ -26,4 +66,7 @@ async function main () {
   gcid.free()
 }
 
-window.onload = main()
+window.onload = function () {
+    main()
+    crypto_gcid()
+}

@@ -1,5 +1,4 @@
 use sha1::{Digest, Sha1};
-use std::cmp;
 use wasm_bindgen::prelude::*;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
@@ -37,6 +36,7 @@ pub struct Gcid {
     context: sha1::Sha1,
     len: usize,
     block_size: usize,
+    count: usize
 }
 
 #[wasm_bindgen]
@@ -45,7 +45,8 @@ impl Gcid {
         Gcid {
             context: Sha1::new(),
             len,
-            block_size: calc_block_size(len)
+            block_size: calc_block_size(len),
+            count: 0
         }
     }
     pub fn block_size (&mut self) -> usize {
@@ -54,17 +55,22 @@ impl Gcid {
     pub fn calculate(&mut self, buffer: &[u8]) -> String {
         // log_u8array(&buffer);
         let filesize = buffer.len();
-        let block_size = cmp::min(self.block_size, filesize);
-        let mut count = 1;
+        let mut count = 262143; // block_size 最小值为262144
         loop {
             if count > filesize {
+                let start = self.count * self.block_size;
+                let end = count - 1;
+                if start < end {
+                    self.context.update(&buffer[start..end]);
+                }
                 break String::from("break");
             } else {
-                match count % block_size {
+                match count % self.block_size {
                     0 => {
-                        let n = count / block_size;
-                        let start = block_size * (n - 1);
-                        let end = block_size * n;
+                        let n = count / self.block_size;
+                        self.count = n;
+                        let start = self.block_size * (n - 1);
+                        let end = self.block_size * n;
                         self.context.update(&buffer[start..end]);
                         count += 1;
                         // log_u32(count);
