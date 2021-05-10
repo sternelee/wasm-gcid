@@ -19,12 +19,12 @@ extern "C" {
     fn log_u8array(a: &[u8]);
 } */
 
-fn calc_block_size(filesize: usize) -> usize {
-    if filesize >= 0 && filesize <= (128 << 20) {
+fn calc_block_size(size: usize) -> usize {
+    if size <= (128 << 20) {
         256 << 10
-    } else if filesize > (128 << 20) && filesize <= (256 << 20) {
+    } else if size > (128 << 20) && size <= (256 << 20) {
         512 << 10
-    } else if filesize > (256 << 20) && filesize <= (512 << 20) {
+    } else if size > (256 << 20) && size <= (512 << 20) {
         1024 << 10
     } else {
         2048 << 10
@@ -34,41 +34,36 @@ fn calc_block_size(filesize: usize) -> usize {
 #[wasm_bindgen]
 pub struct Gcid {
     context: sha1::Sha1,
-    len: usize,
-    block_size: usize,
-    count: usize
+    block_size: usize
 }
 
 #[wasm_bindgen]
 impl Gcid {
-    pub fn new (len: usize) -> Gcid {
+    pub fn new (size: usize) -> Gcid {
         Gcid {
             context: Sha1::new(),
-            len,
-            block_size: calc_block_size(len),
-            count: 0
+            block_size: calc_block_size(size)
         }
     }
     pub fn block_size (&mut self) -> usize {
-        self.block_size
+        return self.block_size;
     }
-    pub fn calculate(&mut self, buffer: &[u8]) -> String {
+    pub fn calculate(&mut self, buffer: &[u8]) -> usize {
         // log_u8array(&buffer);
-        let filesize = buffer.len();
-        let mut count = 262143; // block_size 最小值为262144
+        let buffer_size = buffer.len();
+        let mut count = 262144; // block_size 最小值为262144
+        let mut n: i64 = 0;
         loop {
-            if count > filesize {
-                let start = self.count * self.block_size;
-                let end = count - 1;
-                if start < end {
-                    self.context.update(&buffer[start..end]);
+            if count > buffer_size {
+                let start = n * self.block_size;
+                if start < buffer_size {
+                    self.context.update(&buffer[start..buffer_size]);
                 }
-                break String::from("break");
+                break;
             } else {
                 match count % self.block_size {
                     0 => {
-                        let n = count / self.block_size;
-                        self.count = n;
+                        n = (count / self.block_size) as i64;
                         let start = self.block_size * (n - 1);
                         let end = self.block_size * n;
                         self.context.update(&buffer[start..end]);
@@ -79,10 +74,9 @@ impl Gcid {
                 }
             }
         };
-        return String::from("done");
+        return n;
     }
     pub fn finalize(&mut self) -> String {
-        let result = format!("{:X}", self.context.clone().finalize());
-        return result;
+        return format!("{:X}", self.context.clone().finalize());
     }
 }

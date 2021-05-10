@@ -1,4 +1,5 @@
-import * as wasm from "@sternelee/wasm-gcid";
+// import * as wasm from "@sternelee/wasm-gcid";
+import * as wasm from "wasm-gcid";
 import CryptoJS from "crypto-js";
 
 console.log(wasm);
@@ -46,23 +47,22 @@ function JSGcid (ab, blockSize) {
 }
 
 async function crypto_gcid () {
-    const buffers = await request('/720P.mp4')
+    const buffers = await request('/720P.png')
     const segment = new Uint8Array(buffers);
     const blockSize = calculateBlockSize(segment.byteLength)
-    console.log('blockSize', blockSize)
+    console.log('crypto_gcid blockSize: ', blockSize)
     const result = JSGcid(segment, blockSize);
-    console.log(result)
+    console.log('crypto_gcid result: ', result)
 }
 
 async function main () {
-  const buffers = await request('/720P.mp4')
+  const buffers = await request('/720P.png')
   const segment = new Uint8Array(buffers);
-  console.log('buffers', segment)
   const gcid = Gcid.new(segment.byteLength);
-  console.log(gcid.block_size())
+  console.log('main blockSize: ', gcid.block_size())
   gcid.calculate(segment);
   const result = gcid.finalize();
-  console.log(result);
+  console.log('main result: ', result);
   gcid.free()
 }
 
