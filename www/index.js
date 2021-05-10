@@ -1,4 +1,4 @@
-import * as wasm from "wasm-gcid";
+import * as wasm from "@sternelee/wasm-gcid";
 
 console.log(wasm);
 const { Gcid } = wasm

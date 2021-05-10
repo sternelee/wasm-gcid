@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/rustwasm/create-wasm-app#readme",
   "dependencies": {
-    "wasm-gcid": "file:../pkg"
+    "@sternelee/wasm-gcid": "0.1.1"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^5.0.0",
