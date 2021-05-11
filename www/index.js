@@ -34,11 +34,15 @@ function JSGcid (ab, blockSize) {
     const size = ab.byteLength
     const blockNum = size / blockSize
     for (let i = 0; i < blockNum; i++) {
-      const wa = CryptoJS.lib.WordArray.create(ab.slice(blockSize * i, blockSize * (i + 1)))
+      const start = blockSize * i;
+      const end = blockSize * (i + 1);
+      console.log('the JSGcid buf:', start, end);
+      const wa = CryptoJS.lib.WordArray.create(ab.slice(start, end))
       const bcidSHA1 = CryptoJS.SHA1(wa)
       gcidSHA1.update(bcidSHA1)
     }
     if (blockSize * blockNum < size) {
+      console.log('the JSGcid last: ', blockSize * blockNum, size)
       const wa = CryptoJS.lib.WordArray.create(ab.slice(blockSize * blockNum, size))
       const bcidSHA1 = CryptoJS.SHA1(wa)
       gcidSHA1.update(bcidSHA1)
@@ -50,7 +54,7 @@ async function crypto_gcid () {
     const buffers = await request('/720P.png')
     const segment = new Uint8Array(buffers);
     const blockSize = calculateBlockSize(segment.byteLength)
-    console.log('crypto_gcid blockSize: ', blockSize)
+    console.log('crypto_gcid blockSize: ', blockSize, segment.byteLength)
     const result = JSGcid(segment, blockSize);
     console.log('crypto_gcid result: ', result)
 }

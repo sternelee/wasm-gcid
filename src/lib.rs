@@ -7,7 +7,7 @@ use wasm_bindgen::prelude::*;
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-/* #[wasm_bindgen]
+#[wasm_bindgen]
 extern "C" {
     #[wasm_bindgen(js_namespace = console)]
     fn log(s: &str);
@@ -17,7 +17,7 @@ extern "C" {
 
     #[wasm_bindgen(js_namespace = console, js_name = log)]
     fn log_u8array(a: &[u8]);
-} */
+}
 
 fn calc_block_size(size: usize) -> usize {
     if size <= (128 << 20) {
@@ -52,20 +52,25 @@ impl Gcid {
         // log_u8array(&buffer);
         let buffer_size = buffer.len();
         let mut count = 262144; // block_size 最小值为262144
-        let mut n: i64 = 0;
+        let mut n: usize = 0;
         loop {
             if count > buffer_size {
                 let start = n * self.block_size;
+                let end = buffer_size;
                 if start < buffer_size {
-                    self.context.update(&buffer[start..buffer_size]);
+                    log_u32(start);
+                    log_u32(buffer_size);
+                    self.context.update(&buffer[start..end]);
                 }
                 break;
             } else {
                 match count % self.block_size {
                     0 => {
-                        n = (count / self.block_size) as i64;
+                        n = count / self.block_size;
                         let start = self.block_size * (n - 1);
                         let end = self.block_size * n;
+                        log_u32(start);
+                        log_u32(end);
                         self.context.update(&buffer[start..end]);
                         count += 1;
                         // log_u32(count);
