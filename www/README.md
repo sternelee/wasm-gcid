@@ -1,3 +1,10 @@
+## 使用
+
+```bash
+npm ln ../pkg
+npm run dev
+```
+
 <div align="center">
 
   <h1><code>create-wasm-app</code></h1>

@@ -265,7 +265,7 @@ dependencies = [
 
 [[package]]
 name = "wasm-gcid"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "console_error_panic_hook",
  "sha-1",

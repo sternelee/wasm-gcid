@@ -48,6 +48,12 @@ impl Gcid {
     pub fn block_size (&mut self) -> usize {
         return self.block_size;
     }
+    fn block_hash (&mut self, data: &[u8]) {
+        let mut sha_b = Sha1::new();
+        sha_b.update(data);
+        let wa = sha_b.finalize();
+        self.context.update(wa);
+    }
     pub fn calculate(&mut self, buffer: &[u8]) -> usize {
         // log_u8array(&buffer);
         let buffer_size = buffer.len();
@@ -58,9 +64,8 @@ impl Gcid {
                 let start = n * self.block_size;
                 let end = buffer_size;
                 if start < buffer_size {
-                    log_u32(start);
-                    log_u32(buffer_size);
-                    self.context.update(&buffer[start..end]);
+                    // log(&format!("the wasm is: {}, {}", start, buffer_size));
+                    self.block_hash(&buffer[start..end]);
                 }
                 break;
             } else {
@@ -69,9 +74,8 @@ impl Gcid {
                         n = count / self.block_size;
                         let start = self.block_size * (n - 1);
                         let end = self.block_size * n;
-                        log_u32(start);
-                        log_u32(end);
-                        self.context.update(&buffer[start..end]);
+                        // log(&format!("the wasm is: {}, {}", start, end));
+                        self.block_hash(&buffer[start..end]);
                         count += 1;
                         // log_u32(count);
                     },
