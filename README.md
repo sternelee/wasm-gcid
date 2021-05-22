@@ -10,15 +10,3 @@ npm install --save @sternelee/wasm-gcid
 import * as wasm from "@sternelee/wasm-gcid"
 console.log(wasm)
 ```
-
-## 打包
-
-```bash
-wasm-pack build --scope sternelee
-```
-
-## 发布
-
-```bash
-npm publish --access=public
-```

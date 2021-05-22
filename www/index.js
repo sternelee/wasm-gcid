@@ -1,5 +1,4 @@
-// import * as wasm from "@sternelee/wasm-gcid";
-import * as wasm from "wasm-gcid";
+import * as wasm from "@sternelee/wasm-gcid";
 import CryptoJS from "crypto-js";
 
 console.log(wasm);
