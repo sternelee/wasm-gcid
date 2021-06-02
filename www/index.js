@@ -51,15 +51,18 @@ function JSGcid (ab, blockSize) {
 
 async function crypto_gcid () {
     const buffers = await request('/720P.mp4')
+    console.time("jstime")
     const segment = new Uint8Array(buffers);
     const blockSize = calculateBlockSize(segment.byteLength)
     console.log('crypto_gcid blockSize: ', blockSize, segment.byteLength)
     const result = JSGcid(segment, blockSize);
     console.log('crypto_gcid result: ', result)
+    console.timeEnd("jstime")
 }
 
-async function main () {
+async function wasm_gcid () {
   const buffers = await request('/720P.mp4')
+  console.time("wasmtime")
   const segment = new Uint8Array(buffers);
   const gcid = Gcid.new(segment.byteLength);
   console.log('wam blockSize: ', gcid.block_size())
@@ -67,9 +70,12 @@ async function main () {
   const result = gcid.finalize();
   console.log('wasm result: ', result);
   gcid.free()
+  console.timeEnd("wasmtime")
 }
 
-window.onload = function () {
-    main()
-    crypto_gcid()
+async function main () {
+  await crypto_gcid()
+  await wasm_gcid()
 }
+
+window.onload = main()
