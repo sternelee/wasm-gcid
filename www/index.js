@@ -1,4 +1,5 @@
-import * as wasm from "@sternelee/wasm-gcid";
+// import * as wasm from "@sternelee/wasm-gcid";
+import * as wasm from "wasm-gcid";
 import CryptoJS from "crypto-js";
 
 console.log(wasm);
@@ -69,8 +70,8 @@ async function wasm_gcid () {
   gcid.calculate(segment);
   const result = gcid.finalize();
   console.log('wasm result: ', result);
-  gcid.free()
   console.timeEnd("wasmtime")
+  gcid.free()
 }
 
 async function main () {

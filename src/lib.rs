@@ -1,5 +1,6 @@
 use sha1::{Digest, Sha1};
 use wasm_bindgen::prelude::*;
+use std::cmp;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -7,17 +8,17 @@ use wasm_bindgen::prelude::*;
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = console)]
-    fn log(s: &str);
-
-    #[wasm_bindgen(js_namespace = console, js_name = log)]
-    fn log_u32(a: usize);
-
-    #[wasm_bindgen(js_namespace = console, js_name = log)]
-    fn log_u8array(a: &[u8]);
-}
+// #[wasm_bindgen]
+// extern "C" {
+//     #[wasm_bindgen(js_namespace = console)]
+//     fn log(s: &str);
+//
+//     #[wasm_bindgen(js_namespace = console, js_name = log)]
+//     fn log_u32(a: usize);
+//
+//     #[wasm_bindgen(js_namespace = console, js_name = log)]
+//     fn log_u8array(a: &[u8]);
+// }
 
 fn calc_block_size(size: usize) -> usize {
     if size <= (128 << 20) {
@@ -57,32 +58,18 @@ impl Gcid {
     pub fn calculate(&mut self, buffer: &[u8]) -> usize {
         // log_u8array(&buffer);
         let buffer_size = buffer.len();
-        let mut count = 262144; // block_size 最小值为262144
+        let count = buffer_size / self.block_size;
         let mut n: usize = 0;
         loop {
-            if count > buffer_size {
-                let start = n * self.block_size;
-                let end = buffer_size;
-                if start < buffer_size {
-                    // log(&format!("the wasm is: {}, {}", start, buffer_size));
-                    self.block_hash(&buffer[start..end]);
-                }
+            if n > count {
                 break;
             } else {
-                match count % self.block_size {
-                    0 => {
-                        n = count / self.block_size;
-                        let start = self.block_size * (n - 1);
-                        let end = self.block_size * n;
-                        // log(&format!("the wasm is: {}, {}", start, end));
-                        self.block_hash(&buffer[start..end]);
-                        count += 1;
-                        // log_u32(count);
-                    },
-                    _ => count += 1,
-                }
+                let start = n * self.block_size;
+                let end = cmp::min((n + 1) * self.block_size, buffer_size);
+                self.block_hash(&buffer[start..end]);
+                n += 1;
             }
-        };
+        }
         return n;
     }
     pub fn finalize(&mut self) -> String {
