@@ -4,7 +4,7 @@ specifiers:
   '@sternelee/wasm-gcid': 0.1.2
   copy-webpack-plugin: ^5.0.0
   crypto-js: ^4.0.0
-  wasm-gcid: file:../pkg
+  wasm-gcid: file:../target/wasm32-unknown-unknown/release/
   webpack: ^4.29.3
   webpack-cli: ^3.1.0
   webpack-dev-server: ^3.1.5
@@ -12,7 +12,7 @@ specifiers:
 dependencies:
   '@sternelee/wasm-gcid': registry.nlark.com/@sternelee/wasm-gcid/0.1.2
   crypto-js: 4.0.0
-  wasm-gcid: link:../pkg
+  wasm-gcid: link:../target/wasm32-unknown-unknown/release
 
 devDependencies:
   copy-webpack-plugin: registry.nlark.com/copy-webpack-plugin/5.1.2_webpack@4.46.0

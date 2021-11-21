@@ -3,6 +3,8 @@ import * as wasm from "wasm-gcid";
 import CryptoJS from "crypto-js";
 
 console.log(wasm);
+
+let link = '/1.mp4'
 const { Gcid } = wasm
 const request = async function (url) {
   return new Promise((resolve, reject) => {
@@ -51,7 +53,7 @@ function JSGcid (ab, blockSize) {
 }
 
 async function crypto_gcid () {
-    const buffers = await request('/720P.mp4')
+    const buffers = await request(link)
     console.time("jstime")
     const segment = new Uint8Array(buffers);
     const blockSize = calculateBlockSize(segment.byteLength)
@@ -62,7 +64,7 @@ async function crypto_gcid () {
 }
 
 async function wasm_gcid () {
-  const buffers = await request('/720P.mp4')
+  const buffers = await request(link)
   console.time("wasmtime")
   const segment = new Uint8Array(buffers);
   const gcid = Gcid.new(segment.byteLength);
